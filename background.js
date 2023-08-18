@@ -11,7 +11,7 @@ const importFastmailIdentities = async () => {
       fastmailIdentities = await FastmailIdentities.fromAccountName(
         account.name
       );
-      thunderbirdIdentities = new ThunderbirdIdentities(account.id);
+      thunderbirdIdentities = new ThunderbirdIdentities(account);
       console.log(
         `Found Fastmail account matching local account ${account.name}`
       );

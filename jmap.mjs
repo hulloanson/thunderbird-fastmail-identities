@@ -1,5 +1,3 @@
-import { getToken } from "./token.mjs";
-
 const JMAP_SESSION_RES_URL = "https://api.fastmail.com/jmap/session";
 
 export const JMAP_CAP_CORE = "urn:ietf:params:jmap:core";

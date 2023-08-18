@@ -68,16 +68,3 @@ export class FastmailIdentities extends Identities {
     return fastmailToThunderbird(fastmailIdentities);
   }
 }
-
-export const getFastmailAccountsIds = async () => {
-  // TODO: get fastmail account ids as marked by user
-  return ["account1"];
-};
-
-export const getThunderbirdFastmailAccounts = async () => {
-  // TODO: get actual fastmail account using fastmail's jmap api
-  const fastmailAccountIds = await getFastmailAccountsIds();
-  return (await window.messenger.accounts.list()).filter((account) =>
-    fastmailAccountIds.includes(account.id)
-  );
-};

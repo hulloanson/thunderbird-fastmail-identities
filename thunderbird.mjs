@@ -4,17 +4,17 @@ import { sortNewAndExisting } from "./utils.mjs";
 const messenger = window.messenger;
 
 export class ThunderbirdIdentities extends Identities {
-  constructor(accountId) {
+  constructor(account) {
     super();
-    this.accountId = accountId;
+    this.account = account;
   }
 
   async list() {
-    return await messenger.identities.list(this.accountId);
+    return await messenger.identities.list(this.account.id);
   }
 
   async upsertMultiple(identities) {
-    const accountId = this.accountId;
+    const accountId = this.account.id;
     const localIdentities = await this.list();
     const [newIdentities, existingIdentities] = sortNewAndExisting(
       localIdentities,
@@ -33,10 +33,14 @@ export class ThunderbirdIdentities extends Identities {
         messenger.identities.create(accountId, identity)
       )
     );
-    console.log("inserted identities", insertedIdentities);
+    const accountDesc = `${this.account.id} (name: ${this.account.name})`;
+    console.log(
+      `Created new identities for ${accountDesc}`,
+      insertedIdentities
+    );
     const updatedIdentities = await Promise.all(
       toUpdate.map((record) => messenger.identities.update(...record))
     );
-    console.log("updated identities", updatedIdentities);
+    console.log(`Updated identities for ${accountDesc}`, updatedIdentities);
   }
 }
