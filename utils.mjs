@@ -8,3 +8,7 @@ export const sortNewAndExisting = (oldSet, newSet, compareFn) =>
     },
     [[], []]
   );
+
+export const describeAccount = (account) => {
+  return `${account.name} (id: ${account.id})`;
+};
