@@ -1,24 +1,29 @@
-import { getFastmailAccounts, getFastmailIdentities } from "./fastmail.mjs";
-import { upsertIdentities } from "./local.mjs";
+import { FastmailIdentities } from "./fastmail.mjs";
+import { ThunderbirdIdentities } from "./thunderbird.mjs";
 
-const fastmailToThunderbird = (remoteIdentities) =>
-  remoteIdentities.map(({ email, name }) => ({
-    email,
-    name,
-  }));
+const importFastmailIdentities = async () => {
+  const localAccounts = await window.messenger.accounts.list();
 
-const main = async () => {
-  const fastmailAccounts = await getFastmailAccounts();
-
-  for (const account of fastmailAccounts) {
-    const identities = await getFastmailIdentities();
-
-    await upsertIdentities(account.id, fastmailToThunderbird(identities));
-
-    // prototyping: controlled dev environment. there's only 1 fastmail account.
-    // TODO: handle > 1 fastmail account
-    break;
+  for (const account of localAccounts) {
+    let fastmailIdentities = null,
+      thunderbirdIdentities = null;
+    try {
+      fastmailIdentities = await FastmailIdentities.fromAccountName(
+        account.name
+      );
+      thunderbirdIdentities = new ThunderbirdIdentities(account.id);
+      console.log(
+        `Found Fastmail account matching local account ${account.name}`
+      );
+    } catch (e) {
+      console.info(
+        `Did not find ${account.name} using the provided Fastmail api token. Skipping. Note Thunderbird account name must match Fastmail account name for this extension to associate them.`
+      );
+      continue;
+    }
+    const identities = await fastmailIdentities.list();
+    thunderbirdIdentities.upsertMultiple(identities);
   }
 };
 
-main();
+importFastmailIdentities();
