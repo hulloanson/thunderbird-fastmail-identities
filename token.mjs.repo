@@ -1,0 +1,5 @@
+export const getToken = async () => {
+  // prototyping: copy file as token.mjs and paste token here.
+  // TODO: get token from storage
+  return "fastmail api token";
+};
