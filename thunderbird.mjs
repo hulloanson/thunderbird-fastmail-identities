@@ -28,9 +28,6 @@ export class ThunderbirdIdentities extends Identities {
       { name: remote.name, email: remote.email },
     ]);
 
-    console.log("toCreate, toUpdate", toCreate, toUpdate);
-    return;
-
     const insertedIdentities = await Promise.all(
       toCreate.map((identity) =>
         messenger.identities.create(accountId, identity)
