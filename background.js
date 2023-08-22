@@ -1,36 +1,10 @@
 import { FastmailIdentities } from "./fastmail.mjs";
 import { ThunderbirdIdentities } from "./thunderbird.mjs";
-import { describeAccount } from "./utils.mjs";
-
-const describeAccounts = (accounts) => {
-  return accounts.map(describeAccount).join("<br />");
-};
-
-const summarizeResults = (imported, skipped, failed) => {
-  return Object.entries({
-    "Imported accounts": imported,
-    "Skipped accounts": skipped,
-    "Failed accounts": failed,
-  })
-    .reduce((acc, [desc, accounts]) => {
-      if (accounts.length > 0) {
-        acc.push(desc, describeAccounts(accounts));
-      }
-      return acc;
-    }, [])
-    .join("<br /><br />");
-};
-
-const notifyResults = (imported, skipped, failed) => {
-  browser.notifications.create("", {
-    type: "basic",
-    title:
-      imported.length > 0 ? "Imported identities" : "No identities imported.",
-    message: summarizeResults(imported, skipped, failed),
-  });
-};
+import { logWTime } from "./utils.mjs";
+import { logResults } from "./outputs.mjs";
 
 const importFastmailIdentities = async () => {
+  logWTime(console.log, "Importing fastmail identities");
   const localAccounts = await window.messenger.accounts.list();
 
   const importedAccounts = [];
@@ -45,7 +19,8 @@ const importFastmailIdentities = async () => {
         account.name
       );
       thunderbirdIdentities = new ThunderbirdIdentities(account);
-      console.log(
+      logWTime(
+        console.log,
         `Found Fastmail account matching local account ${account.name}`
       );
     } catch (e) {
@@ -60,13 +35,32 @@ const importFastmailIdentities = async () => {
       thunderbirdIdentities.upsertMultiple(identities);
       importedAccounts.push(account);
     } catch (e) {
-      console.error(
+      logWTime(
+        console.error,
         `Failed to import identities for ${account.id} (name: ${account.name})`
       );
       failedAccounts.push(account);
     }
   }
-  notifyResults(importedAccounts, skippedAccounts, failedAccounts);
+  logResults(importedAccounts, skippedAccounts, failedAccounts);
+  logWTime(console.log, "Imported fastmail identities");
 };
 
-importFastmailIdentities();
+// TODO: get interval from settings
+const getInterval = async () => 5 * 60 * 1000;
+
+const perodicImportIdentities = async () => {
+  const interval = await getInterval();
+  try {
+    importFastmailIdentities();
+  } catch (e) {
+    logWTime(console.error, ": Periodic import identities: error thrown", e);
+  }
+  setTimeout(perodicImportIdentities, interval);
+};
+
+const main = async () => {
+  perodicImportIdentities();
+};
+
+main();

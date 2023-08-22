@@ -12,6 +12,5 @@ export const sortNewAndExisting = (oldSet, newSet, compareFn) =>
     [[], []]
   );
 
-export const describeAccount = (account) => {
-  return `${account.name} (id: ${account.id})`;
-};
+export const logWTime = (fn, ...args) =>
+  fn(`${new Date().toISOString()}:`, ...args);
